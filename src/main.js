@@ -27,6 +27,12 @@ const autosaveChk = document.getElementById('autosaveChk');
 const versionEl = document.getElementById('version');
 versionEl.textContent = `v${pkg.version}`;
 
+
+fetch('./package.json')
+    .then(r => r.json())
+    .then(pkg => { versionEl.textContent = `v${pkg.version}`; })
+    .catch(() => {});
+
 // Additional elements and state for live duration display and waveform during recording.
 // The durationEl element shows the running length of the narration while recording.  The
 // analyser, analyserData and animationFrameId variables drive a real‑time waveform and

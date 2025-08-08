@@ -26,6 +26,12 @@ const autosaveChk = document.getElementById('autosaveChk') as HTMLInputElement;
 const versionEl = document.getElementById('version') as HTMLSpanElement;
 versionEl.textContent = `v${pkg.version}`;
 
+
+fetch('./package.json')
+  .then(r => r.json())
+  .then(pkg => { versionEl.textContent = `v${pkg.version}`; })
+  .catch(() => {});
+
 const waveform = new Waveform(waveCanvas);
 const audioChunks: Blob[] = [];
 let mediaRecorder: MediaRecorder | null = null;
