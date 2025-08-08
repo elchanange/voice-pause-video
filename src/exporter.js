@@ -31,10 +31,17 @@ export class Exporter {
       throw new Error('ffmpeg script not loaded');
     }
     this.ffmpeg = new FFmpegClass();
+    // Explicitly provide the URLs for the ffmpeg core files.  Without these
+    // parameters, the library falls back to a default that may attempt to
+    // dynamically import worker chunks from the @ffmpeg/ffmpeg package.  On
+    // GitHub Pages this can trigger a CORS error because those chunk files are
+    // not served from our origin.  Pointing coreURL/wasmURL/workerURL at the
+    // @ffmpeg/core package (version 0.10.0) ensures a single bundle is loaded
+    // without cross‑origin requests.
     await this.ffmpeg.load({
-      coreURL: undefined,
-      wasmURL: undefined,
-      workerURL: undefined,
+      coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js',
+      wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.wasm',
+      workerURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.worker.js',
       logger: ({ message }) => {
         const m = String(message || '');
         const match = m.match(/\s(\d{1,3})%/);
