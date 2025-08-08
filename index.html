@@ -6,7 +6,8 @@
   <title>Voice‑Pause‑Video</title>
   <link rel="stylesheet" href="./style.css" />
   <!-- ffmpeg.wasm (loaded from CDN at runtime) -->
-  <script defer src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/ffmpeg.min.js"></script>
+  <!-- Use the UMD build which attaches FFmpegWASM to the global object.  We avoid the 404 error from the old path by using jsDelivr -->
+  <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/umd/ffmpeg.js"></script>
 </head>
 <body>
   <header>
@@ -47,6 +48,9 @@
             <button id="redoBtn" class="button">בצע שוב</button>
           </div>
         </div>
+
+        <!-- Display the length of the recorded narration (in seconds) -->
+        <div id="audioDuration" class="muted"></div>
 
         <div id="progressWrap" class="hidden">
           <div class="progress-bar"><div id="progress"></div></div>
