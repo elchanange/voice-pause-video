@@ -86,7 +86,7 @@ export class Exporter {
       const segEnd = p.startVideoTime;
       if (segEnd > segStart + 0.001) {
         const out = `seg_${segIndex++}.mp4`;
-        await this.ffmpeg.exec(['-i','input.mp4','-ss',fmtTime(segStart),'-to',fmtTime(segEnd),'-c','copy',out]);
+        await this.ffmpeg.run('-i','input.mp4','-ss',fmtTime(segStart),'-to',fmtTime(segEnd),'-c','copy',out);
         concatList.push(`file '${out}'`);
       }
       const stillPng = `still_${segIndex}.png`;
@@ -94,13 +94,13 @@ export class Exporter {
       await this.writeFile(stillPng, b);
       const stillMp4 = `seg_${segIndex++}.mp4`;
       const freezeFilters = ['-loop','1','-i',stillPng,'-t',fmtTime(p.pauseDuration),'-vf','format=yuv420p,scale=trunc(iw/2)*2:trunc(ih/2)*2','-r','30','-pix_fmt','yuv420p',stillMp4];
-      await this.ffmpeg.exec(freezeFilters);
+      await this.ffmpeg.run(...freezeFilters);
       concatList.push(`file '${stillMp4}'`);
       last = segEnd;
     }
     // tail segment
     const tailOut = `seg_${segIndex++}.mp4`;
-    await this.ffmpeg.exec(['-i','input.mp4','-ss',fmtTime(last),'-c','copy',tailOut]);
+    await this.ffmpeg.run('-i','input.mp4','-ss',fmtTime(last),'-c','copy',tailOut);
     concatList.push(`file '${tailOut}'`);
 
     // write concat list
@@ -108,14 +108,14 @@ export class Exporter {
     await this.writeFile('list.txt', new TextEncoder().encode(concatTxt));
 
     // concat segments
-    await this.ffmpeg.exec(['-f','concat','-safe','0','-i','list.txt','-c','copy','video_full.mp4']);
+    await this.ffmpeg.run('-f','concat','-safe','0','-i','list.txt','-c','copy','video_full.mp4');
 
     // normalize voice if requested
     const audioOut = normalize ? ['-af','loudnorm=I=-16:TP=-1.5:LRA=11'] : [];
-    await this.ffmpeg.exec(['-i','voice.m4a',...audioOut,'-c:a','aac','-b:a','192k','voice.aac']);
+    await this.ffmpeg.run('-i','voice.m4a',...audioOut,'-c:a','aac','-b:a','192k','voice.aac');
 
     // mux final
-    await this.ffmpeg.exec(['-i','video_full.mp4','-i','voice.aac','-map','0:v:0','-map','1:a:0','-c:v','copy','-shortest','output.mp4']);
+    await this.ffmpeg.run('-i','video_full.mp4','-i','voice.aac','-map','0:v:0','-map','1:a:0','-c:v','copy','-shortest','output.mp4');
     const data = this.ffmpeg.FS('readFile', 'output.mp4');
     return new Blob([data.buffer], { type: 'video/mp4' });
   }
