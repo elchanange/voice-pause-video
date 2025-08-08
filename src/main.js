@@ -303,7 +303,28 @@ redoBtn.addEventListener('click', () => {
 
 // Export logic
 async function doExport() {
-  if (!audioBlob) { alert('אין קריינות מוקלטת'); return; }
+  // If no narration exists at all, generate a silent audio track of the same
+  // duration as the video (or at least one second).  Without this fallback,
+  // export would bail out when no microphone is available.  The silent track
+  // ensures FFmpeg has an audio stream to mux with the video.
+  if (!audioBlob || !audioPCM || audioPCM.length === 0) {
+    try {
+      const dur = Math.max(1, videoEl.duration || 1);
+      const offline = new OfflineAudioContext(1, dur * 48000, 48000);
+      const buf = offline.createBuffer(1, dur * 48000, 48000);
+      const src = offline.createBufferSource();
+      src.buffer = buf;
+      src.connect(offline.destination);
+      src.start();
+      const rendered = await offline.startRendering();
+      const wav = bufferToWav(rendered);
+      audioBlob = new Blob([wav], { type: 'audio/wav' });
+      // Also set audioPCM so trimming does nothing but not null.
+      audioPCM = rendered.getChannelData(0);
+    } catch (ex) {
+      console.error('Failed to create silent audio', ex);
+    }
+  }
   setProgress(1);
   const exporter = new Exporter((p) => setProgress(p));
   try {
