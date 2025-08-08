@@ -3,6 +3,7 @@
 
 import { Waveform } from './waveform.js';
 import { Exporter } from './exporter.js';
+import pkg from '../package.json' assert { type: 'json' };
 
 // DOM references
 const videoEl = document.getElementById('video');
@@ -23,6 +24,8 @@ const redoBtn = document.getElementById('redoBtn');
 const normalizeChk = document.getElementById('normalizeChk');
 const denoiseChk = document.getElementById('denoiseChk');
 const autosaveChk = document.getElementById('autosaveChk');
+const versionEl = document.getElementById('version');
+versionEl.textContent = `v${pkg.version}`;
 
 // Additional elements and state for live duration display and waveform during recording.
 // The durationEl element shows the running length of the narration while recording.  The
