@@ -145,6 +145,20 @@ async function startRecording() {
       audioPCM.set(ch0);
       waveform.drawFromPCM(audioPCM);
     }
+    // Display the duration of the recorded narration.  Use 48 kHz as assumed sample rate.
+    try {
+      const dur = audioPCM ? audioPCM.length / 48000 : 0;
+      const durEl = document.getElementById('audioDuration');
+      if (durEl) {
+        if (dur > 0) {
+          durEl.textContent = 'אורך הקלטה: ' + dur.toFixed(2) + ' שניות';
+        } else {
+          durEl.textContent = '';
+        }
+      }
+    } catch {
+      // ignore errors
+    }
     saveProject();
   };
   mediaRecorder.start(100);

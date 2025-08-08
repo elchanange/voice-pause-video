@@ -17,9 +17,20 @@ export class Exporter {
    */
   async ensureFFmpeg() {
     if (this.ffmpeg) return;
-    const { FFmpeg } = window;
-    if (!FFmpeg) throw new Error('ffmpeg script not loaded');
-    this.ffmpeg = new FFmpeg();
+    // Attempt to obtain the FFmpeg class from the global scope.  Depending on the build
+    // loaded in index.html, the UMD build attaches an object named `FFmpegWASM` to the
+    // window with a `FFmpeg` property.  Earlier versions exposed `FFmpeg` directly on
+    // window.  We poll a few times to allow the script to finish loading before giving up.
+    let FFmpegClass = window.FFmpeg || (window.FFmpegWASM && window.FFmpegWASM.FFmpeg);
+    // Poll up to 10 times with 500ms interval for the script to load
+    for (let i = 0; !FFmpegClass && i < 10; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      FFmpegClass = window.FFmpeg || (window.FFmpegWASM && window.FFmpegWASM.FFmpeg);
+    }
+    if (!FFmpegClass) {
+      throw new Error('ffmpeg script not loaded');
+    }
+    this.ffmpeg = new FFmpegClass();
     await this.ffmpeg.load({
       coreURL: undefined,
       wasmURL: undefined,
