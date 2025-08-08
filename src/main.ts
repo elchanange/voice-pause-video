@@ -1,5 +1,6 @@
 import { Waveform } from './waveform';
 import { Exporter, PauseRange } from './exporter';
+import pkg from '../package.json' assert { type: 'json' };
 
 // App State
 type HistoryItem = { type: 'trim'; from: { start: number; end: number }; to: { start: number; end: number } };
@@ -23,6 +24,8 @@ const normalizeChk = document.getElementById('normalizeChk') as HTMLInputElement
 const denoiseChk = document.getElementById('denoiseChk') as HTMLInputElement;
 const autosaveChk = document.getElementById('autosaveChk') as HTMLInputElement;
 const versionEl = document.getElementById('version') as HTMLSpanElement;
+versionEl.textContent = `v${pkg.version}`;
+
 
 fetch('./package.json')
   .then(r => r.json())

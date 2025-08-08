@@ -3,6 +3,7 @@
 
 import { Waveform } from './waveform.js';
 import { Exporter } from './exporter.js';
+import pkg from '../package.json' assert { type: 'json' };
 
 // DOM references
 const videoEl = document.getElementById('video');
@@ -24,6 +25,8 @@ const normalizeChk = document.getElementById('normalizeChk');
 const denoiseChk = document.getElementById('denoiseChk');
 const autosaveChk = document.getElementById('autosaveChk');
 const versionEl = document.getElementById('version');
+versionEl.textContent = `v${pkg.version}`;
+
 
 fetch('./package.json')
     .then(r => r.json())
