@@ -16,38 +16,36 @@ export class Exporter {
    * Ensure ffmpeg.wasm is loaded.  Loads once on demand.
    */
   async ensureFFmpeg() {
+    // If we already created an FFmpeg instance return early.
     if (this.ffmpeg) return;
-    // Attempt to obtain the FFmpeg class from the global scope.  Depending on the build
-    // loaded in index.html, the UMD build attaches an object named `FFmpegWASM` to the
-    // window with a `FFmpeg` property.  Earlier versions exposed `FFmpeg` directly on
-    // window.  We poll a few times to allow the script to finish loading before giving up.
-    let FFmpegClass = window.FFmpeg || (window.FFmpegWASM && window.FFmpegWASM.FFmpeg);
-    // Poll up to 10 times with 500ms interval for the script to load
-    for (let i = 0; !FFmpegClass && i < 10; i++) {
+    // ffmpeg.wasm exposes a factory called `createFFmpeg` on the global `FFmpeg` object.
+    // The legacy constructor exported by some builds is not a real constructor and
+    // causes `FFmpegClass is not a constructor` errors.  Here we obtain the
+    // factory and construct an instance properly.
+    let FM = window.FFmpeg;
+    // If the library isn't loaded yet, wait up to 10 × 500ms for it to appear.
+    for (let i = 0; (!FM || !FM.createFFmpeg) && i < 10; i++) {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      FFmpegClass = window.FFmpeg || (window.FFmpegWASM && window.FFmpegWASM.FFmpeg);
+      FM = window.FFmpeg;
     }
-    if (!FFmpegClass) {
-      throw new Error('ffmpeg script not loaded');
+    if (!FM || !FM.createFFmpeg) {
+      throw new Error('FFmpeg library not loaded');
     }
-    this.ffmpeg = new FFmpegClass();
-    // Explicitly provide the URLs for the ffmpeg core files.  Without these
-    // parameters, the library falls back to a default that may attempt to
-    // dynamically import worker chunks from the @ffmpeg/ffmpeg package.  On
-    // GitHub Pages this can trigger a CORS error because those chunk files are
-    // not served from our origin.  Pointing coreURL/wasmURL/workerURL at the
-    // @ffmpeg/core package (version 0.10.0) ensures a single bundle is loaded
-    // without cross‑origin requests.
-    await this.ffmpeg.load({
-      coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js',
-      wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.wasm',
-      workerURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.worker.js',
+    const { createFFmpeg } = FM;
+    // Instantiate ffmpeg with a custom corePath pointing at the @ffmpeg/core files
+    // hosted on jsDelivr.  Passing `logger` into the options allows us to report
+    // progress updates via the provided callback.  The `log` option can be
+    // toggled for debugging.
+    this.ffmpeg = createFFmpeg({
+      log: false,
+      corePath: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js',
       logger: ({ message }) => {
         const m = String(message || '');
         const match = m.match(/\s(\d{1,3})%/);
         if (match) this.onProgress(Number(match[1]));
       },
     });
+    await this.ffmpeg.load();
   }
 
   /**
