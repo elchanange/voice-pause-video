@@ -22,6 +22,12 @@ const redoBtn = document.getElementById('redoBtn') as HTMLButtonElement;
 const normalizeChk = document.getElementById('normalizeChk') as HTMLInputElement;
 const denoiseChk = document.getElementById('denoiseChk') as HTMLInputElement;
 const autosaveChk = document.getElementById('autosaveChk') as HTMLInputElement;
+const versionEl = document.getElementById('version') as HTMLSpanElement;
+
+fetch('./package.json')
+  .then(r => r.json())
+  .then(pkg => { versionEl.textContent = `v${pkg.version}`; })
+  .catch(() => {});
 
 const waveform = new Waveform(waveCanvas);
 const audioChunks: Blob[] = [];
