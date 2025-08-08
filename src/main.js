@@ -23,6 +23,12 @@ const redoBtn = document.getElementById('redoBtn');
 const normalizeChk = document.getElementById('normalizeChk');
 const denoiseChk = document.getElementById('denoiseChk');
 const autosaveChk = document.getElementById('autosaveChk');
+const versionEl = document.getElementById('version');
+
+fetch('./package.json')
+    .then(r => r.json())
+    .then(pkg => { versionEl.textContent = `v${pkg.version}`; })
+    .catch(() => {});
 
 // Additional elements and state for live duration display and waveform during recording.
 // The durationEl element shows the running length of the narration while recording.  The
