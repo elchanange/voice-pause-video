@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -p .",
     "watch": "tsc -w -p .",
-    "serve": "npx http-server -c-1 .",
+    "serve": "node server.mjs",
     "test": "ts-node tests/pauseResume.test.ts"
   },
   "devDependencies": {

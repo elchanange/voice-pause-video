@@ -11,11 +11,13 @@ npm i
 ```bash
 npm run build
 ```
-3. הרצה מקומית (שרת סטטי):
+3. הרצה מקומית (שרת סטטי עם כותרות COOP/COEP):
 ```bash
 npm run serve
 ```
 בדפדפן גלוש ל־http://localhost:8080
+
+> שים/י לב: השרת המקומי מוסיף כותרות `Cross-Origin-Opener-Policy` ו‑`Cross-Origin-Embedder-Policy` הנדרשות להפעלת `SharedArrayBuffer` בדפדפן.
 
 > שים/י לב: בזמן ריצה נטענת ספריית ffmpeg.wasm מה־CDN (unpkg). אין שרת צד-אחורי.
 
@@ -28,4 +30,5 @@ npm run serve
 ```bash
 npm run test
 ```
+
 
