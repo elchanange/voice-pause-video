@@ -57,7 +57,7 @@ export class Exporter {
     if (data instanceof Uint8Array) u8 = data;
     else if (data instanceof ArrayBuffer) u8 = new Uint8Array(data);
     else u8 = new Uint8Array(await data.arrayBuffer());
-    await this.ffmpeg.writeFile(name, u8);
+    this.ffmpeg.FS('writeFile', name, u8);
   }
 
   /**
@@ -116,7 +116,7 @@ export class Exporter {
 
     // mux final
     await this.ffmpeg.exec(['-i','video_full.mp4','-i','voice.aac','-map','0:v:0','-map','1:a:0','-c:v','copy','-shortest','output.mp4']);
-    const data = await this.ffmpeg.readFile('output.mp4');
+    const data = this.ffmpeg.FS('readFile', 'output.mp4');
     return new Blob([data.buffer], { type: 'video/mp4' });
   }
 }
