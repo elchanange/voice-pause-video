@@ -3,7 +3,8 @@
 export interface PauseRange { startVideoTime: number; pauseDuration: number; frameDataURL: string; }
 
 export class Exporter {
-  private ffmpeg: any;
+  // initialize ffmpeg to undefined so property is defined under strict initialization
+  private ffmpeg: any = undefined;
   constructor(private onProgress: (p: number) => void) {}
 
   async ensureFFmpeg() {

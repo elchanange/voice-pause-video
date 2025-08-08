@@ -1,7 +1,9 @@
 export class Waveform {
-  private ctx: CanvasRenderingContext2D;
-  private width: number;
-  private height: number;
+  // non-null assertion on ctx allows strict property initialization
+  // width/height are initialized to 0 to satisfy TypeScript strict checks
+  private ctx!: CanvasRenderingContext2D;
+  private width: number = 0;
+  private height: number = 0;
   private pixelRatio = Math.min(2, window.devicePixelRatio || 1);
 
   constructor(private canvas: HTMLCanvasElement) {
