@@ -3,13 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin" />
+  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp" />
   <title>Voice‑Pause‑Video</title>
   <link rel="stylesheet" href="./style.css" />
   <!-- ffmpeg.wasm (loaded from CDN at runtime) -->
   <!-- Load the FFmpeg UMD build (v0.10.0).  This version does not split the library into multiple chunks, avoiding
        cross‑origin worker errors that occurred with later versions.  It automatically fetches the matching
        @ffmpeg/core files from a CDN. -->
-  <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.0/dist/ffmpeg.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.0/dist/ffmpeg.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
   <header>

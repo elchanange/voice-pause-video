@@ -5,3 +5,9 @@
 [dev]
   command = "npm run serve"
   port = 8080
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"
