@@ -45,3 +45,10 @@ footer{padding:1rem; color:var(--muted); text-align:center}
 
 details{margin-top:.75rem}
 details label{display:inline-flex; align-items:center; gap:.5rem; margin-inline-end:1rem}
+
+/* Display the recording length below the waveform */
+#audioDuration {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
