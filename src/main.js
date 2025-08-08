@@ -24,6 +24,16 @@ const normalizeChk = document.getElementById('normalizeChk');
 const denoiseChk = document.getElementById('denoiseChk');
 const autosaveChk = document.getElementById('autosaveChk');
 
+// Additional elements and state for live duration display and waveform during recording.
+// The durationEl element shows the running length of the narration while recording.  The
+// analyser, analyserData and animationFrameId variables drive a real‑time waveform and
+// duration update via requestAnimationFrame.  recordStartTime stores when recording began.
+const durationEl = document.getElementById('audioDuration');
+let analyser = null;
+let analyserData = null;
+let animationFrameId = 0;
+let recordStartTime = 0;
+
 // Instantiate waveform renderer
 const waveform = new Waveform(waveCanvas);
 // Recording buffers and state
@@ -111,6 +121,13 @@ async function loadVideoFile(file) {
 // Recording logic
 async function startRecording() {
   if (isRecording) return;
+  // Initialize live duration display and waveform state.  Record the time at which recording starts
+  // and reset the duration indicator to 0.00 seconds.  These values will be updated on each
+  // animation frame via requestAnimationFrame.
+  recordStartTime = performance.now();
+  if (durationEl) {
+    durationEl.textContent = 'אורך הקלטה: 0.00 שניות';
+  }
   const constraints = { audio: { echoCancellation: true, noiseSuppression: true }, video: false };
   stream = await navigator.mediaDevices.getUserMedia(constraints);
   audioCtx = new AudioContext();
@@ -131,6 +148,12 @@ async function startRecording() {
     lastNode = compNode;
   }
   const dest = audioCtx.createMediaStreamDestination();
+  // Create an analyser node so that we can draw a live waveform of the microphone input.
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 2048;
+  analyserData = new Float32Array(analyser.fftSize);
+  // Route the processed audio to both the analyser and the final media stream destination.
+  lastNode.connect(analyser);
   lastNode.connect(dest);
   mediaRecorder = new MediaRecorder(dest.stream, { mimeType: 'audio/webm;codecs=opus', audioBitsPerSecond: 192000 });
   audioChunks.length = 0;
@@ -164,6 +187,20 @@ async function startRecording() {
   mediaRecorder.start(100);
   isRecording = true;
   badge.classList.remove('hidden');
+  // Launch a loop that updates the waveform and duration on each animation frame.  This loop
+  // runs until stopRecording() cancels it.
+  const draw = () => {
+    if (!analyser) return;
+    analyser.getFloatTimeDomainData(analyserData);
+    // Draw the current audio buffer.  Using requestAnimationFrame ensures smooth updates.
+    waveform.drawFromPCM(analyserData);
+    if (durationEl) {
+      const sec = (performance.now() - recordStartTime) / 1000;
+      durationEl.textContent = 'אורך הקלטה: ' + sec.toFixed(2) + ' שניות';
+    }
+    animationFrameId = requestAnimationFrame(draw);
+  };
+  animationFrameId = requestAnimationFrame(draw);
   await videoEl.play();
 }
 
@@ -174,6 +211,16 @@ function stopRecording() {
   if (audioCtx) audioCtx.close();
   isRecording = false;
   badge.classList.add('hidden');
+
+  // Cancel any ongoing animation frame and release analyser resources.  Without
+  // cancelling here, the waveform would continue to draw and the duration
+  // indicator would keep updating even after recording stops.
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = 0;
+  }
+  analyser = null;
+  analyserData = null;
 }
 
 function togglePause() {
