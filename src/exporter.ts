@@ -13,11 +13,17 @@ export class Exporter {
     const { FFmpeg } = window as any;
     if (!FFmpeg) throw new Error('ffmpeg script not loaded');
     this.ffmpeg = new FFmpeg();
-    await this.ffmpeg.load({ coreURL: undefined, wasmURL: undefined, workerURL: undefined, logger: ({ message }) => {
-      const m = String(message || '');
-      const match = m.match(/\s(\d{1,3})%/);
-      if (match) this.onProgress(Number(match[1]));
-    }});
+    await this.ffmpeg.load({
+      coreURL: undefined,
+      wasmURL: undefined,
+      workerURL: undefined,
+      // Provide a type for the destructured message parameter to satisfy strict TypeScript settings.
+      logger: ({ message }: { message?: any }) => {
+        const m = String(message || '');
+        const match = m.match(/\s(\d{1,3})%/);
+        if (match) this.onProgress(Number(match[1]));
+      },
+    });
   }
 
   private async writeFile(name: string, data: Uint8Array | ArrayBuffer | Blob) {
