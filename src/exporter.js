@@ -86,21 +86,41 @@ export class Exporter {
       const segEnd = p.startVideoTime;
       if (segEnd > segStart + 0.001) {
         const out = `seg_${segIndex++}.mp4`;
-        await this.ffmpeg.run('-i','input.mp4','-ss',fmtTime(segStart),'-to',fmtTime(segEnd),'-c','copy',out);
+        await this.ffmpeg.run(
+          '-ss', fmtTime(segStart),
+          '-t', fmtTime(segEnd - segStart),
+          '-i', 'input.mp4',
+          '-c', 'copy',
+          out
+        );
         concatList.push(`file '${out}'`);
       }
       const stillPng = `still_${segIndex}.png`;
       const b = await (await fetch(p.frameDataURL)).arrayBuffer();
       await this.writeFile(stillPng, b);
       const stillMp4 = `seg_${segIndex++}.mp4`;
-      const freezeFilters = ['-loop','1','-i',stillPng,'-t',fmtTime(p.pauseDuration),'-vf','format=yuv420p,scale=trunc(iw/2)*2:trunc(ih/2)*2','-r','30','-pix_fmt','yuv420p',stillMp4];
+      const freezeFilters = [
+        '-loop','1','-i',stillPng,
+        '-t',fmtTime(p.pauseDuration),
+        '-vf','format=yuv420p,scale=trunc(iw/2)*2:trunc(ih/2)*2',
+        '-r','30',
+        '-pix_fmt','yuv420p',
+        '-c:v','libx264',
+        '-preset','veryfast',
+        stillMp4
+      ];
       await this.ffmpeg.run(...freezeFilters);
       concatList.push(`file '${stillMp4}'`);
       last = segEnd;
     }
     // tail segment
     const tailOut = `seg_${segIndex++}.mp4`;
-    await this.ffmpeg.run('-i','input.mp4','-ss',fmtTime(last),'-c','copy',tailOut);
+    await this.ffmpeg.run(
+      '-ss', fmtTime(last),
+      '-i', 'input.mp4',
+      '-c', 'copy',
+      tailOut
+    );
     concatList.push(`file '${tailOut}'`);
 
     // write concat list
