@@ -1,0 +1,7 @@
+[build]
+  publish = "."
+  command = "npm run build || echo skipping-build"
+
+[dev]
+  command = "npm run serve"
+  port = 8080

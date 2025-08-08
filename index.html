@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Voice‑Pause‑Video</title>
+  <link rel="stylesheet" href="./style.css" />
+  <!-- ffmpeg.wasm (loaded from CDN at runtime) -->
+  <script defer src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/ffmpeg.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Voice‑Pause‑Video</h1>
+  </header>
+
+  <main id="app">
+    <section id="home">
+      <div id="dropzone" tabindex="0" aria-label="גרור וזרוק וידאו כאן">
+        <p>גרור/י וידאו לכאן או</p>
+        <label class="button primary" for="videoFile">העלאת וידאו</label>
+        <input id="videoFile" type="file" accept="video/mp4,video/webm,video/quicktime" hidden />
+      </div>
+
+      <div id="playerArea" class="hidden">
+        <div class="video-wrap">
+          <video id="video" controls playsinline></video>
+          <div id="recordBadge" class="badge hidden">● הקלטה פעילה</div>
+        </div>
+
+        <div class="controls">
+          <button id="startRec" class="button big">
+            🎙️ התחל הקלטה (R)
+          </button>
+          <button id="togglePause" class="button big" title="רווח – השהה/המשך וידאו">
+            ⏸️ השהה / ▶️ המשך (רווח)
+          </button>
+          <button id="exportBtn" class="button big">
+            📤 יצוא (E)
+          </button>
+        </div>
+
+        <div id="timeline">
+          <canvas id="wave" height="90" aria-label="גל הקול"></canvas>
+          <div id="trimControls">
+            <button id="trimSilence" class="button">חתוך שקט</button>
+            <button id="undoBtn" class="button">בטל</button>
+            <button id="redoBtn" class="button">בצע שוב</button>
+          </div>
+        </div>
+
+        <div id="progressWrap" class="hidden">
+          <div class="progress-bar"><div id="progress"></div></div>
+          <div id="progressText" class="progress-text">0%</div>
+        </div>
+
+        <div id="tips">רמז: <span title="Spacebar – Pause / Resume Video">רווח – השהה / המשך וידאו</span></div>
+
+        <details id="extras">
+          <summary>תוספות (נחמד שיהיה)</summary>
+          <label><input type="checkbox" id="normalizeChk" /> ייצוב עוצמה (Normalize)</label>
+          <label><input type="checkbox" id="denoiseChk" /> הפחתת רעש קלה</label>
+          <label><input type="checkbox" id="autosaveChk" checked /> שמור פרויקט אוטומטית</label>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <small>© 2025</small>
+  </footer>
+
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>
